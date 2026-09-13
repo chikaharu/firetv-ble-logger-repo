@@ -24,7 +24,6 @@ import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.util.SparseArray;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -82,6 +81,7 @@ public class MainActivity extends Activity {
     private TextView tetherTargetValue;
     private TextView tetherSourceValue;
     private TextView continuityValue;
+    private TextView beaconValue;
     private TextView markValue;
     private Button startButton;
     private Button markButton;
@@ -127,6 +127,7 @@ public class MainActivity extends Activity {
         header.addView(title, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
 
         statusValue = new TextView(this);
+        statusValue.setText("READY");
         statusValue.setTextSize(18);
         statusValue.setTextColor(Color.WHITE);
         statusValue.setGravity(Gravity.END);
@@ -157,8 +158,7 @@ public class MainActivity extends Activity {
         tetherTargetValue = addStatCard(row2, "0x0D TARGET", "0", card);
         tetherSourceValue = addStatCard(row2, "0x0E SOURCE", "0", card);
         continuityValue = addStatCard(row2, "0x10 / 0x12 / 0x16", "0 / 0 / 0", card);
-        TextView beaconValue = addStatCard(row2, "0x02 iBEACON", "0", card);
-        beaconValue.setTag("beacon");
+        beaconValue = addStatCard(row2, "0x02 iBEACON", "0", card);
         root.addView(row2, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 118));
 
         TextView pathLabel = new TextView(this);
@@ -481,8 +481,8 @@ public class MainActivity extends Activity {
     }
 
     private void refreshDashboard() {
-        int next = scanning ? currentExperimentNo : getNextExperimentNo();
-        experimentValue.setText(String.format(Locale.US, "EXP %04d", next));
+        int displayExperiment = currentExperimentNo > 0 ? currentExperimentNo : getNextExperimentNo();
+        experimentValue.setText(String.format(Locale.US, "EXP %04d", displayExperiment));
         long elapsed = scanning ? SystemClock.elapsedRealtime() - startedAtElapsed : 0;
         elapsedValue.setText(formatElapsed(elapsed));
         markValue.setText("MARKS " + markCount);
@@ -493,18 +493,10 @@ public class MainActivity extends Activity {
         tetherTargetValue.setText(String.valueOf(type0D));
         tetherSourceValue.setText(String.valueOf(type0E));
         continuityValue.setText(type10 + " / " + type12 + " / " + type16);
-
-        View row2 = ((LinearLayout) tetherTargetValue.getParent()).getParent();
-        if (row2 instanceof LinearLayout) {
-            LinearLayout row = (LinearLayout) row2;
-            if (row.getChildCount() >= 4) {
-                LinearLayout card = (LinearLayout) row.getChildAt(3);
-                if (card.getChildCount() >= 2) ((TextView) card.getChildAt(1)).setText(String.valueOf(type02));
-            }
-        }
+        beaconValue.setText(String.valueOf(type02));
 
         if (experimentDir != null) pathValue.setText(experimentDir.getAbsolutePath());
-        else pathValue.setText(defaultOutputHint(next));
+        else pathValue.setText(defaultOutputHint(getNextExperimentNo()));
     }
 
     private String defaultOutputHint(int experimentNo) {
