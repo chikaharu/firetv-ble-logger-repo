@@ -4,6 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
+      - 'app/**'
       - '.github/workflows/release-apk.yml'
   workflow_dispatch:
 
@@ -37,13 +38,13 @@ jobs:
       - name: Create or update GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: v0.1.0
+          TAG: v0.2.0
         run: |
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" firetv-ble-logger.apk --clobber
           else
             gh release create "$TAG" firetv-ble-logger.apk \
-              --title "Fire TV BLE Logger v0.1.0" \
-              --notes "Passive BLE advertisement logger for Fire TV / Android. Debug APK for BLE/Continuity observation experiments." \
+              --title "Instant Hotspot BLE Logger v0.2.0" \
+              --notes "Fire TV dashboard UI for passive BLE/Apple Continuity experiments. Adds experiment-numbered output folders and event markers." \
               --latest
           fi
